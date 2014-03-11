@@ -1,0 +1,37 @@
+NAME
+    cps - check process is running
+
+SYNOPSIS
+    cps INTERVAL[UNIT] PROCESS COUNT
+
+DESCRIPTION
+    Check that PROCESS is running every time INTERVAL has elapsed
+    for COUNT times. If COUNT is 0 then cps will run infinitely.
+
+    TIME is the amount of alloted time to wait before rechecking,
+    and can be given a optional suffix of UNIT, where UNIT is 
+    anything in [s|m|h|d] (meaning seconds, minutes, hours and
+    days, respectively). If nothing is given, then UNIT
+    defaults to seconds.
+  
+    For example, `cps 40 foo 4` would check every 40 seconds
+    to see if the process named `foo` is running, for a 
+    maximum of 4 times.
+   
+    If PROCESS terminates and cps is still running, cps will
+    exit.
+  
+AUTHOR
+    Written by Finn O'leary.
+  
+REPORTING BUGS
+    Please report any bugs to `gallefray@inventati.org`
+    or `@Gallefray`. You can also submit a bug report or a
+    suggestion on the github page:
+    http://github.com/Gallefray/cps
+  
+NOTES
+    The commands `ps`, `grep` and `sleep` must be installed
+
+SEE ALSO
+    ps(1), grep(1), sleep(1)
