@@ -1,2 +1,2 @@
 build:
-	gcc cps.c -o cps
+	gcc -Wall cps.c -o cps

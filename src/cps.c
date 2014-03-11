@@ -44,7 +44,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <limits.h> // use this instead of hard coding the string limit
+//#include <limits.h>	// use this instead of hard coding the string limit?
+
+#define MCMDLEN 255	// Max CoMmanD LENgth
 
 #define arg_debug()  \
     printf("%d ", argc);\
@@ -53,37 +55,70 @@
     printf("%s ", argv[(argc-3)]);
 
 
-char ps_cmd[255];
-char w_cmd[255];
-char ret[2]; 
+int cmd(char cmd[MCMDLEN]);
+int ret_ps_stat(int in, char *ps_name);
+
+char ps_cmd[MCMDLEN];
+char w_cmd[MCMDLEN];
 char *err = NULL;
 
 int main(int argc, char **argv)
 {
     //arg_debug()
-    int cnt = atoi(argv[(argc-1)]); 
-    sprintf(w_cmd, "sleep %s", argv[argc-3]);
-    sprintf(ps_cmd, "ps aux | grep -ic \"%s\" -", argv[argc-2]);
-    
-    int i;
-    for (i = 0; i < cnt; i++) {
-	FILE *f = popen(ps_cmd, "r");
-	fgets(ret, 2, f);
-	pclose(f);
-	
-	int tmp = atoi(ret);
-	tmp -= 3;
-
-	if (tmp >= 1) {
-	    printf("The process `%s` is running, it currently has %d invocation(s).\n", argv[argc-2], tmp);
-	    system(w_cmd);
-	} else if (tmp < 1) {
-	    printf("The process `%s` is not running.\n", argv[argc-2]);
-	    break;
-	} 	    
+    if (argc == 4) {
+	int cnt = atoi(argv[(argc-1)]); 
+	sprintf(w_cmd, "sleep %s", argv[argc-3]);
+	sprintf(ps_cmd, "ps aux | grep -ic \"%s\" -", argv[argc-2]);
+	if (cnt > 0) {
+	    int i, tmp;
+	    for (i = 0; i < cnt; i++) {
+		tmp = cmd(ps_cmd);
+		if ((ret_ps_stat(tmp, argv[argc-2])) == -1)
+		    break;
+	    }
+	}
+	else if (cnt == 0) {
+	    int tmp;
+	    int i = 0;
+	    while (i == 0) {
+		tmp = cmd(ps_cmd);
+		if ((ret_ps_stat(tmp, argv[argc-2])) == -1)
+		    break;
+	    }	    
+	}
+	printf("Done.\n");
     }
-    printf("Done.\n");
-    return 0;
+    else if (argc > 4) {
+	printf("Too many arguments.");
+	return -1;
+    }
+    else if (argc < 4) {
+	printf("Not enough arguments.");
+	return -1;
+    }
+    return 1;
 }
 
+int cmd(char cmd[MCMDLEN])
+{
+    char ret[MCMDLEN];
+    FILE *f = popen(cmd, "r");
+    fgets(ret, MCMDLEN, f);
+    pclose(f);
+    
+    int tmp = atoi(ret);
+    tmp -= 3;
+    return tmp;
+}
 
+int ret_ps_stat(int in, char *ps_name)
+{
+    if (in >= 1) {
+	printf("The process `%s` is running, it currently has %d invocation(s).\n", ps_name, in);
+	system(w_cmd);
+    } else if (in < 1) {
+	printf("The process `%s` is not running.\n", ps_name);
+	return -1;
+    }
+    return 0;
+}
