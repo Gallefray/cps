@@ -44,19 +44,23 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 //#include <limits.h>	// use this instead of hard coding the string limit?
 
 #define MCMDLEN 255	// Max CoMmanD LENgth
 
-#define arg_debug()  \
-    printf("%d ", argc);\
+#define arg_debug() \
+    printf("argc: ");\
+    printf("%d   ", argc);\
+    printf("args: ");\
     printf("%s ", argv[(argc-1)]);\
     printf("%s ", argv[(argc-2)]);\
-    printf("%s ", argv[(argc-3)]);
+    printf("%s ", argv[(argc-3)]);\
+    printf("%s\n", argv[(argc-4)]);
 
-
-int cmd(char cmd[MCMDLEN]);
-int ret_ps_stat(int in, char *ps_name);
+int run_chk(char cmd[MCMDLEN]);
+int ret_ps_stat(int in, char *ps_name, char p_mod);
+int run(int cnt, char *ps_name, char p_mod);
 
 char ps_cmd[MCMDLEN];
 char w_cmd[MCMDLEN];
@@ -69,37 +73,36 @@ int main(int argc, char **argv)
 	int cnt = atoi(argv[(argc-1)]); 
 	sprintf(w_cmd, "sleep %s", argv[argc-3]);
 	sprintf(ps_cmd, "ps aux | grep -ic \"%s\" -", argv[argc-2]);
-	if (cnt > 0) {
-	    int i, tmp;
-	    for (i = 0; i < cnt; i++) {
-		tmp = cmd(ps_cmd);
-		if ((ret_ps_stat(tmp, argv[argc-2])) == -1)
-		    break;
-	    }
-	}
-	else if (cnt == 0) {
-	    int tmp;
-	    int i = 0;
-	    while (i == 0) {
-		tmp = cmd(ps_cmd);
-		if ((ret_ps_stat(tmp, argv[argc-2])) == -1)
-		    break;
-	    }	    
-	}
+	run(cnt, argv[argc-2], 0);
+	
 	printf("Done.\n");
     }
-    else if (argc > 4) {
-	printf("Too many arguments.");
+    else if (argc == 5) {
+	if ((strcmp(argv[argc-4], "-pc")) == 0)	{
+	    int cnt = atoi(argv[(argc-1)]);
+	    sprintf(w_cmd, "sleep %s", argv[argc-3]);
+	    sprintf(ps_cmd, "ps aux | grep -ic \"%s\" -", argv[argc-2]);
+	    run(cnt, argv[argc-2], 1);
+
+	    printf("0\n");
+	}
+	else {
+	    printf("Wrong options given/wrong order.\n");
+	    return -1;
+	}
+    }    
+    else if (argc > 5) {
+	printf("Too many arguments.\n");
 	return -1;
     }
     else if (argc < 4) {
-	printf("Not enough arguments.");
+	printf("Not enough arguments.\n");
 	return -1;
     }
     return 1;
 }
 
-int cmd(char cmd[MCMDLEN])
+int run_chk(char cmd[MCMDLEN])
 {
     char ret[MCMDLEN];
     FILE *f = popen(cmd, "r");
@@ -111,14 +114,49 @@ int cmd(char cmd[MCMDLEN])
     return tmp;
 }
 
-int ret_ps_stat(int in, char *ps_name)
+int ret_ps_stat(int in, char *ps_name, char p_mod)
 {
-    if (in >= 1) {
-	printf("The process `%s` is running, it currently has %d invocation(s).\n", ps_name, in);
-	system(w_cmd);
-    } else if (in < 1) {
-	printf("The process `%s` is not running.\n", ps_name);
-	return -1;
+    if (!p_mod) 
+    {
+	if (in >= 1) {
+	    printf("The process `%s` is running, it currently has %d invocation(s).\n", ps_name, in);
+	    system(w_cmd);
+	} else if (in < 1) {
+	    printf("The process `%s` is not running.\n", ps_name);
+	    return -1;
+	}
     }
+    else 
+    {
+	if (in >= 1) {
+	    printf("%d\n", in);
+	    system(w_cmd);
+	} else if (in < 1) {
+	    printf("0\n");
+	    return -1;
+	}
+    }
+    return 0;
+}
+
+int run(int cnt, char *ps_name, char p_mod)
+{
+    int i, tmp;
+    if (cnt > 0) {
+	    for (i = 0; i < cnt; i++) {
+		tmp = run_chk(ps_cmd);
+		if ((ret_ps_stat(tmp, ps_name, p_mod)) == -1)
+		    break;
+	}
+    }
+    else if (cnt == 0) {
+	while (1) {
+	    tmp = run_chk(ps_cmd);
+	    if ((ret_ps_stat(tmp, ps_name, p_mod)) == -1)
+		    break;
+	}	    
+    }
+    else if (cnt < 0)
+	return -1;
     return 0;
 }
