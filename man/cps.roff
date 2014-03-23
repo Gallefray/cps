@@ -1,0 +1,73 @@
+.TH cps 1 "" "" "User Commands"
+.SH NAME
+.P
+cps - check process is running at a set interval
+
+.SH SYNOPSIS
+.P
+.RB cps
+.RB [ \-m
+.IR email_address ]
+.RB [ \-pc ]
+.IB INTERVAL[ UNIT ]
+.IR PROCESS
+.IR COUNT
+
+.SH DESCRIPTION
+.P
+
+Check that process
+.IR PROCESS
+is running every time
+.IR INTERVAL
+has elapsed for
+.IR COUNT
+times. If 
+.IR COUNT
+is 0 then cps will run indefinitely.
+.P
+.IR TIME
+is the amount of alloted time to wait before rechecking, and can be given a optional suffix of 
+.IR UNIT ,
+where 
+.IR UNIT
+is anything in 
+.BR [s|m|h|d]
+(meaning seconds, minutes, hours and days, respectively). If nothing is given, then 
+.IR UNIT
+defaults to seconds.
+.P
+For example, `cps 40 foo 4` would check every 40 seconds to see if th process named `foo` is running, for a maximum of 4 times.
+.P
+If
+.IR PROCESS
+terminates and cps is still running, cps will exit.
+
+.SH OPTIONS
+.P
+.BR \-pc
+    Process count. cps will output the number of processes instead of the usual output.
+.TP
+.SH AUTHOR
+.P
+Written by Finn O'leary.
+The argument `-pc` was suggested by Richard Belchi (Folis).
+
+.SH REPORTING BUGS
+.P
+Please report any bugs to 
+.IR gallefray@inventati.org 
+or 
+.IR \@Gallefray .
+You can also submit a bug report or a suggestion on the github page:
+.IR https://www.github.com/Gallefray/cps
+
+.SH NOTES
+.P
+The commands `ps`, `grep` and `sleep` must be installed for cps to run.
+
+.SH SEE ALSO
+.P
+ps(1), grep(1), sleep(1)
+
+
